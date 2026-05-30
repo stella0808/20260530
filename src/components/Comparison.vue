@@ -87,6 +87,8 @@ const isAfter = ref(false)
 /* 外層容器設定 3D 視角 */
 .slide-container {
   perspective: 1000px;
+  max-width: 850px; /* 縮小展示格子的最大寬度 */
+  margin: 0 auto;   /* 讓展示格子保持置中 */
 }
 
 /* 翻轉動畫過渡設定 */
@@ -142,8 +144,7 @@ const isAfter = ref(false)
 
 .grid-4 { 
   display: grid; 
-  /* 使用 auto-fit 讓卡片在空間不夠時自動換行，增強彈性 */
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+  grid-template-columns: repeat(2, 1fr); /* 強制設定為兩欄，確保排版是 2x2 各二 */
   gap: 1.2rem; 
   margin-top: 2rem; 
 }
