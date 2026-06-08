@@ -11,12 +11,25 @@ const features = ref([
   { id: 3, title: '精準配色', desc: '控制顏色數量，讓重點自然浮現。', icon: '🎨' }
 ])
 
-// 實用小技巧資料
+// 實用小技巧資料 (擴展為 6 個，並加入背面教學內容)
 const tips = ref([
-  { id: 1, title: '一頁一重點', desc: '觀眾的注意力有限，試著將複雜的資訊拆分成多張投影片，避免版面擁擠。', icon: '🎯' },
-  { id: 2, title: '善用對齊', desc: '無論是置左、置中或置右，將畫面中的文字與圖片對齊，能瞬間提升專業度。', icon: '📏' },
-  { id: 3, title: '圖表簡化', desc: '去除多餘的格線、圖例與立體效果，直接在圖表上方標示出想傳達的關鍵數據。', icon: '📊' }
+  { id: 1, title: '一頁一重點', desc: '觀眾的注意力有限，試著將複雜的資訊拆分成多張投影片，避免版面擁擠。', icon: '🎯', backTitle: '💡 實踐方法', backDesc: '限制每頁文字在 50 字以內，或一次只講述一個核心概念。' },
+  { id: 2, title: '善用對齊', desc: '無論是置左、置中或置右，將畫面中的文字與圖片對齊，能瞬間提升專業度。', icon: '📏', backTitle: '💡 實踐方法', backDesc: '開啟簡報軟體的「格線與輔助線」功能，確保邊緣完美對齊。' },
+  { id: 3, title: '圖表簡化', desc: '去除多餘的格線、圖例與立體效果，直接在圖表上方標示出想傳達的關鍵數據。', icon: '📊', backTitle: '💡 實踐方法', backDesc: '把非重點數據的顏色調淡（如灰色），高亮你想強調的特定長條圖。' },
+  { id: 4, title: '高對比度', desc: '確保文字與背景顏色有足夠的對比，讓坐在最後一排的觀眾也能輕鬆看清。', icon: '🌗', backTitle: '💡 實踐方法', backDesc: '深色背景配淺色文字，避免使用相近色（如深藍配黑）。' },
+  { id: 5, title: '一致的視覺', desc: '全篇簡報使用相同的字體、顏色組合與圖示風格，建立專業品牌感。', icon: '✨', backTitle: '💡 實踐方法', backDesc: '建立「投影片母片」，預先設定好標題與內文的位置和專屬樣式。' },
+  { id: 6, title: '高畫質素材', desc: '模糊、帶有浮水印或比例變形的圖片會大幅降低簡報的質感。', icon: '🖼️', backTitle: '💡 實踐方法', backDesc: '推薦使用 Unsplash、Pexels 等免費的高畫質圖庫網站。' }
 ])
+
+// 追蹤被點擊翻轉的卡片 ID (為了支援手機版點擊翻轉)
+const flippedIds = ref([])
+const toggleFlip = (id) => {
+  if (flippedIds.value.includes(id)) {
+    flippedIds.value = flippedIds.value.filter(tipId => tipId !== id)
+  } else {
+    flippedIds.value.push(id)
+  }
+}
 </script>
 
 <template>
@@ -40,11 +53,27 @@ const tips = ref([
     <section class="tips-section">
       <h2 class="section-title">💡 實用小技巧</h2>
       <div class="tips-grid">
-        <div class="tip-card" v-for="tip in tips" :key="tip.id">
-          <div class="tip-icon">{{ tip.icon }}</div>
-          <div class="tip-content">
-            <h4>{{ tip.title }}</h4>
-            <p>{{ tip.desc }}</p>
+        <div 
+          class="tip-card-wrapper" 
+          v-for="tip in tips" 
+          :key="tip.id"
+          @click="toggleFlip(tip.id)"
+          @mouseleave="flippedIds = flippedIds.filter(id => id !== tip.id)"
+        >
+          <div class="tip-card-inner" :class="{ 'is-flipped': flippedIds.includes(tip.id) }">
+            <!-- 卡片正面 -->
+            <div class="tip-card-front">
+              <div class="tip-icon">{{ tip.icon }}</div>
+              <div class="tip-content">
+                <h4>{{ tip.title }}</h4>
+                <p>{{ tip.desc }}</p>
+              </div>
+            </div>
+            <!-- 卡片背面 -->
+            <div class="tip-card-back">
+              <h4>{{ tip.backTitle }}</h4>
+              <p>{{ tip.backDesc }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -170,18 +199,65 @@ body.dark-theme .hero {
   gap: 1.2rem;
 }
 
-.tip-card {
+/* 翻轉卡片外層容器 */
+.tip-card-wrapper {
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+/* 翻轉卡片內層控制 */
+.tip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* 滑鼠懸浮 或 手機點擊時觸發翻轉 */
+.tip-card-wrapper:hover .tip-card-inner,
+.tip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* 共通的正反面樣式 */
+.tip-card-front, .tip-card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  border: 1px solid var(--nav-border);
+  box-sizing: border-box;
+}
+
+/* 卡片正面 */
+.tip-card-front {
   display: flex;
   gap: 1.2rem;
   background: var(--card-bg);
-  border: 1px solid var(--nav-border);
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.tip-card:hover {
-  transform: translateY(-2px);
+/* 卡片背面 */
+.tip-card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--primary-color);
+  color: white;
+  text-align: center;
+  border-color: var(--primary-color);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.tip-card-wrapper:hover .tip-card-front {
   border-color: var(--text-muted);
   box-shadow: 0 6px 16px rgba(0,0,0,0.04);
 }
@@ -190,4 +266,18 @@ body.dark-theme .hero {
 .tip-content h4 { margin: 0 0 0.4rem 0; font-size: 1.1rem; color: var(--text-main); }
 .tip-content p { margin: 0; font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; }
 
+/* 背面文字排版 */
+.tip-card-back h4 {
+  margin: 0 0 0.6rem 0;
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.tip-card-back p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+}
 </style>

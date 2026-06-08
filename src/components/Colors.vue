@@ -31,6 +31,27 @@ const copyToClipboard = async (color) => {
     console.error('複製失敗:', error)
   }
 }
+
+// 下載範本功能 (動態產生當前配色的 JSON 檔案)
+const downloadTemplate = () => {
+  const templateData = JSON.stringify({
+    themeName: activeTheme.value.name,
+    colors: activeTheme.value.colors,
+    description: '這是一個自動生成的配色範本資料'
+  }, null, 2)
+  
+  const blob = new Blob([templateData], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${activeTheme.value.name}_配色範本.json`
+  document.body.appendChild(link)
+  link.click()
+  
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -70,7 +91,13 @@ const copyToClipboard = async (color) => {
         <div class="demo-ui" :style="{ backgroundColor: activeTheme.colors[2] }">
           <header class="demo-header" :style="{ borderBottom: `1px solid ${activeTheme.colors[1]}` }">
             <div class="demo-logo" :style="{ color: activeTheme.colors[0] }">MyBrand</div>
-            <button class="demo-btn" :style="{ backgroundColor: activeTheme.colors[3], color: '#ffffff' }">下載範本</button>
+            <button 
+              class="demo-btn" 
+              :style="{ backgroundColor: activeTheme.colors[3], color: '#ffffff' }"
+              @click="downloadTemplate"
+            >
+              下載範本
+            </button>
           </header>
           <main class="demo-main">
             <h1 class="demo-title" :style="{ color: activeTheme.colors[0] }">用色彩說服觀眾</h1>
@@ -159,6 +186,12 @@ const copyToClipboard = async (color) => {
   padding: 0.5rem 1.2rem;
   border-radius: 20px;
   font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.demo-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
 }
 .demo-main {
   padding: 2.5rem 1.5rem;
